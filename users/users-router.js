@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const errorWrapper = require('../handlers/errorWrapper');
 const userDB = require('./users-model');
 const generateToken = require('../auth/generateToken');
+const authUser = require('../auth/authUser');
 
 router.route('/')
   .get(errorWrapper(async (req, res) => {
@@ -36,14 +37,16 @@ router.route('/register')
 router.route('/login')
   .post(errorWrapper(async (req, res) => {
     let credentials = req.body;
-    if(credentials && credentials.username && credentials.password) {
-      let storedUser = await userDB.findByEmail(user.email);
+    if(credentials && credentials.email && credentials.password) {
+      let [storedUser] = await userDB.findByEmail(credentials.email);
       if(storedUser && await bcrypt.compare(credentials.password, storedUser.password)) {
         let token = generateToken(storedUser);
         res.status(200).json({ token });
       } else {
         res.status(400).json({ message: 'Invalid credentials' });
       }
+    } else {
+      res.status(400).json({ message: 'You must supply an email and password' });
     }
   }));
 
@@ -54,14 +57,16 @@ router.route('/:id')
     if(user) res.status(200).json(user);
     else res.status(404).json({ message: 'Could not find user' });
   }))
-  .put(errorWrapper(async (req, res) => {
+  .put(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
     let updates = req.body;
+    if(updates.password) updates.password = await bcrypt.hash(updates.password, 8);
     let updated = await userDB.update(id, updates);
+    console.log(updated);
     if(updated) res.status(200).json({ message: 'User updated', user_id: id });
     else res.status(400).json({ message: 'Could not update user' });
   }))
-  .delete(errorWrapper(async (req, res) => {
+  .delete(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
     let deleted = await userDB.remove(id);
     if(deleted) res.status(200).json({ message: 'User deleted', user_id: id });

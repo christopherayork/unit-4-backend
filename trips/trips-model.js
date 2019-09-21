@@ -2,6 +2,23 @@ const db = require('../database/dbConfig');
 
 function find() {
   return db('trips');
+  return db.select([
+    'id as trip_id',
+    'user_id',
+    'location',
+    'description',
+    'short_desc'
+  ])
+    .from('trips')
+    .join(function() {
+      this.select([
+        'id as photo_id',
+        'url'
+      ])
+        .from('photos')
+        .where('photos.trip_id', '=', 'trips.id')
+        .limit(1);
+    });
 }
 
 function findByID(id) {
@@ -41,12 +58,8 @@ function insertPhoto(trip_id, photo) {
 
 function insertPhotos(trip_id, photos) {
   if(!Array.isArray(photos) || !trip_id) return false;
-  let success;
-  photos.forEach(async (photo) => {
-    success = await insertPhoto(trip_id, photo);
-    if(!success) return false;
-  });
-  return success;
+  let updatedPhotos = photos.map(photo => ({...photo, trip_id: +trip_id}));
+  return db('photos').insert(updatedPhotos);
 }
 
 function updatePhoto(id, photo) {
@@ -59,7 +72,7 @@ function removePhoto(id) {
 }
 
 function removePhotos(trip_id) {
-  return db('trips').where({ trip_id }).del();
+  return db('photos').where({ trip_id }).del();
 }
 
 module.exports = {

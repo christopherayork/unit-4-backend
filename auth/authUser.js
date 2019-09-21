@@ -6,7 +6,7 @@ const authUser = async (req, res, next) => {
   if(!auth) res.status(400).json({ message: 'Token required' });
   else {
     jwt.verify(auth, secrets.jwtSecret, (err, decodedToken) => {
-      if(e) res.status(400).json({ message: 'Invalid token' });
+      if(err) res.status(400).json({ message: 'Invalid token' });
       else {
         req.user = decodedToken;
         next();

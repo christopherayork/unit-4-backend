@@ -12,15 +12,16 @@ router.route('/')
   }))
   .post(authUser, errorWrapper(async (req, res) => {
     let trip = req.body;
-    let photos = [...trip.photos];
+    let photos = trip.photos ? [...trip.photos] : null;
     trip = { user_id: trip.user_id, location: trip.location, description: trip.description, short_desc: trip.short_desc };
     if(!trip || !trip.location || !trip.description || !trip.user_id) res.status(400).json({ message: 'Could not post trip to that user' });
     else {
-      let posted = await tripDB.insert(trip);
-      if(posted) {
-        let photoPosted = await tripDB.insertPhotos(posted[0], photos);
-        res.status(201).json({ message: 'Trip created', trip_id: posted[0], photos: photoPosted ? 'Photos posted' : 'Photos weren\'t posted' });
+      let [posted] = await tripDB.insert(trip);
+      if(posted && Array.isArray(photos)) {
+        let photoPosted = await tripDB.insertPhotos(posted, photos);
+        res.status(201).json({ message: 'Trip created', trip_id: posted, photos: photoPosted ? 'Photos posted' : 'Photos weren\'t posted' });
       }
+      else if(posted) res.status(201).json({ message: 'Trip created', trip_id: posted[0] });
       else res.status(400).json({ message: 'Could not post trip' });
     }
   }));
@@ -28,7 +29,7 @@ router.route('/')
 router.route('/:id')
   .get(errorWrapper(async (req, res) => {
     let id = req.params.id;
-    let trip = await tripDB.findByID(id);
+    let [trip] = await tripDB.findByID(id);
     let photos = await tripDB.getPhotos(id);
     if(trip) {
       trip.photos = photos;
@@ -43,10 +44,11 @@ router.route('/:id')
     let photos = req.body;
     if(!id || !photos || !Array.isArray(photos)) res.status(400).json({ message: 'Photos must be in an array' });
     let posted = await tripDB.insertPhotos(id, photos);
+    console.log(posted);
     if(posted) res.status(201).json({ message: 'Photos posted to trip' });
     else res.status(400).json({ message: 'Failed to post photos' });
   }))
-  .put(errorWrapper(async (req, res) => {
+  .put(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
     let updates = req.body;
     if(!id || !updates) res.status(400).json({ message: 'No changes to make' });
@@ -56,7 +58,7 @@ router.route('/:id')
       else res.status(400).json({ message: 'Trip could not be updated' });
     }
   }))
-  .delete(errorWrapper(async (req, res) => {
+  .delete(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
     let deleted = await tripDB.remove(id);
     if(deleted) res.status(200).json({ message: 'Trip deleted' });
@@ -70,14 +72,14 @@ router.route('/photo/:id')
     if(photo) res.status(200).json(photo);
     else res.status(404).json({ message: 'Could not find photo' });
   }))
-  .put(errorWrapper(async (req, res) => {
+  .put(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
     let updates = req.body;
     let updated = await tripDB.updatePhoto(id, updates);
     if(updated) res.status(200).json({ message: 'Photo updated' });
     else res.status(400).json({ message: 'Could not update photo' });
   }))
-  .delete(errorWrapper(async (req, res) => {
+  .delete(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
     let deleted = await tripDB.removePhoto(id);
     if(deleted) res.status(200).json({ message: 'Deleted photo' });
@@ -91,7 +93,7 @@ router.route('/:id/photos')
     if(photos) res.status(200).json(photos);
     else res.status(404).json({ message: 'Could not retrieve photos' });
   }))
-  .delete(errorWrapper(async (req, res) => {
+  .delete(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
     let deleted = await tripDB.removePhotos(id);
     if(deleted) res.status(200).json({ message: 'Deleted photos', count: Array.isArray(deleted) ? deleted[0] : deleted });
