@@ -2,23 +2,6 @@ const db = require('../database/dbConfig');
 
 function find() {
   return db('trips');
-  return db.select([
-    'id as trip_id',
-    'user_id',
-    'location',
-    'description',
-    'short_desc'
-  ])
-    .from('trips')
-    .join(function() {
-      this.select([
-        'id as photo_id',
-        'url'
-      ])
-        .from('photos')
-        .where('photos.trip_id', '=', 'trips.id')
-        .limit(1);
-    });
 }
 
 function findByID(id) {
@@ -49,11 +32,6 @@ function getFirstPhoto(trip_id) {
 
 function getPhotos(trip_id) {
   return db('photos').where({ trip_id });
-}
-
-function insertPhoto(trip_id, photo) {
-  if(!trip_id || !photo || !photo.url) return false;
-  return db('photos').insert({ trip_id, ...photo });
 }
 
 function insertPhotos(trip_id, photos) {
