@@ -7,7 +7,6 @@ exports.up = function(knex) {
       tbl.string('password').notNullable();
       tbl.string('first_name').notNullable();
       tbl.string('last_name');
-      tbl.string('location');
     })
     .createTable('trips', tbl => {
       tbl.increments();
@@ -20,11 +19,16 @@ exports.up = function(knex) {
       tbl.increments();
       tbl.integer('trip_id').notNullable().references('id').inTable('trips');
       tbl.string('url').notNullable();
+    })
+    .createTable('tokens', tbl => {
+      tbl.integer('user_id').unique().notNullable().references('id').inTable('users');
+      tbl.string('token').notNullable().unique();
     });
 };
 
 exports.down = function(knex) {
   return knex.schema
+    .dropTableIfExists('tokens')
     .dropTableIfExists('photos')
     .dropTableIfExists('trips')
     .dropTableIfExists('users');

@@ -13,12 +13,14 @@ router.route('/')
     else res.status(404).json({ message: 'Could not retrieve users' });
   }));
 
+
+// user id returns 0
 router.route('/register')
   .post(errorWrapper(async (req, res) => {
     let user = req.body;
     if(user && user.email && user.password && user.first_name) {
       user.password = await bcrypt.hash(user.password, 8);
-      let success = await userDB.insert(user);
+      let [success] = await userDB.insert(user);
       if(success === -1) res.status(400).json({ message: 'That email is already taken' });
       else if(!success) res.status(400).json({ message: 'Could not register that account' });
       else {
@@ -26,6 +28,7 @@ router.route('/register')
         if(!storedUser) res.status(400).json({ message: 'User was not saved properly' });
         else {
           let token = generateToken(storedUser);
+          await userDB.assignToken(success, token);
           res.status(201).json({ ...success, token, message: 'User saved, token is used to authenticate' });
         }
       }
@@ -41,6 +44,7 @@ router.route('/login')
       let [storedUser] = await userDB.findByEmail(credentials.email);
       if(storedUser && await bcrypt.compare(credentials.password, storedUser.password)) {
         let token = generateToken(storedUser);
+        await userDB.assignToken(storedUser.id, token);
         res.status(200).json({ token });
       } else {
         res.status(400).json({ message: 'Invalid credentials' });
@@ -53,7 +57,8 @@ router.route('/login')
 router.route('/:id')
   .get(errorWrapper(async (req, res) => {
     let id = req.params.id;
-    let user = await userDB.findByID(id);
+    let [user] = await userDB.findByID(id);
+    user.trips = await userDB.findTripsById(id);
     if(user) res.status(200).json(user);
     else res.status(404).json({ message: 'Could not find user' });
   }))
@@ -62,7 +67,6 @@ router.route('/:id')
     let updates = req.body;
     if(updates.password) updates.password = await bcrypt.hash(updates.password, 8);
     let updated = await userDB.update(id, updates);
-    console.log(updated);
     if(updated) res.status(200).json({ message: 'User updated', user_id: id });
     else res.status(400).json({ message: 'Could not update user' });
   }))
