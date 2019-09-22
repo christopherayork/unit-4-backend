@@ -18,6 +18,7 @@ exports.up = function(knex) {
     .createTable('photos', tbl => {
       tbl.increments();
       tbl.integer('trip_id').notNullable().references('id').inTable('trips');
+      tbl.integer('user_id').notNullable().references('id').inTable('users');
       tbl.string('url').notNullable();
     })
     .createTable('tokens', tbl => {

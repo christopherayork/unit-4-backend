@@ -30,7 +30,7 @@ router.route('/register')
         else {
           let token = generateToken(storedUser);
           await userDB.assignToken(success, token);
-          res.status(201).json({ ...success, token, message: 'User saved, token is used to authenticate' });
+          res.status(201).json({ user_id: success, token, message: 'User saved, token is used to authenticate' });
         }
       }
     } else {
@@ -67,16 +67,24 @@ router.route('/:id')
   .put(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
     let updates = req.body;
-    if(updates.password) updates.password = await bcrypt.hash(updates.password, 8);
-    let updated = await userDB.update(id, updates);
-    if(updated) res.status(200).json({ message: 'User updated', user_id: id });
-    else res.status(400).json({ message: 'Could not update user' });
+    let [current] = await userDB.findByID(id);
+    if(req.user_id !== current.id) res.status(400).json({ message: 'Permission denied' });
+    else {
+      if(updates.password) updates.password = await bcrypt.hash(updates.password, 8);
+      let updated = await userDB.update(id, updates);
+      if(updated) res.status(200).json({ message: 'User updated', user_id: id });
+      else res.status(400).json({ message: 'Could not update user' });
+    }
   }))
   .delete(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
-    let deleted = await userDB.remove(id);
-    if(deleted) res.status(200).json({ message: 'User deleted', user_id: id });
-    else res.status(400).json({ message: 'Could not delete user' });
+    let [current] = await userDB.findByID(id);
+    if(req.user_id !== current.id) res.status(400).json({ message: 'Permission denied' });
+    else {
+      let deleted = await userDB.remove(id);
+      if(deleted) res.status(200).json({ message: 'User deleted', user_id: id });
+      else res.status(400).json({ message: 'Could not delete user' });
+    }
   }));
 
 

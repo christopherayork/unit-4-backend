@@ -7,7 +7,6 @@
  * @apiDescription Get all users:
   * Grabs all users from the table
  *
- * @apiParam {Number} id Unique user id
  *
  * @apiSuccess {Number} id ID of the User.
  * @apiSuccess {String} email Email of the User.
@@ -87,6 +86,8 @@
   * @apiName GetUser
   * @apiGroup Users
   *
+  * @apiParam {Number} id Unique user id
+  *
   * @apiSuccess {Number} id ID of the User.
   * @apiSuccess {String} email Email of the User.
   * @apiSuccess {String} first_name First name of the User.
@@ -120,6 +121,8 @@
   * @apiName UpdateUser
   * @apiGroup Users
   *
+  * @apiParam {Number} id Unique user id
+  *
   * @apiSuccess {String} message User updated.
   * @apiSuccess {Number} user_id ID of updated user.
   *
@@ -137,4 +140,24 @@
   *     }
   *
   *  @apiError (Error 400) FailUpdateUser Could not update user.
+  */
+
+ /**
+  * @api {delete} /users/:id Delete a user
+  * @apiVersion 1.0.0
+  * @apiName DeleteUser
+  * @apiGroup Users
+  *
+  * @apiParam {Number} id Unique user id
+  *
+  * @apiSuccess {String} message User deleted.
+  * @apiSuccess {Number} user_id ID of deleted user.
+  *
+  * @apiExample {js} Example Header (required) request.header:
+  *     {
+  *       "token": "jsonwebtoken"
+  *     }
+  *
+  * @apiError (Rejected 400) UnauthorizedDelete Invalid Credentials
+  * @apiError (Error 400) FailDeleteUser Could not delete user
   */

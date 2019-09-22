@@ -25,7 +25,7 @@ async function assignToken(user_id, token) {
 
 async function verifyToken(token) {
   let [auth] = await db('tokens').where({ token });
-  return !!auth;
+  return auth;
 }
 
 async function insert(user) {
@@ -40,7 +40,8 @@ function update(id, updates) {
   return db('users').where({ id }).update(updates);
 }
 
-function remove(id) {
+async function remove(id) {
+  await db('tokens').where({ user_id: id }).del();
   return db('users').where({ id }).del();
 }
 

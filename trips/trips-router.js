@@ -18,6 +18,7 @@ router.route('/')
     else {
       let [posted] = await tripDB.insert(trip);
       if(posted && Array.isArray(photos)) {
+        photos = photos.map(p => ({...p, user_id: trip.user_id}));
         let photoPosted = await tripDB.insertPhotos(posted, photos);
         res.status(201).json({ message: 'Trip created', trip_id: posted, photos: photoPosted ? 'Photos posted' : 'Photos weren\'t posted' });
       }
@@ -37,32 +38,29 @@ router.route('/:id')
     }
     else res.status(404).json({ message: 'Could not find trip' });
   }))
-  .post(authUser, errorWrapper(async (req, res) => {
-    // for posting photos to a trip
-    // photos are expected to be in an array
-    let id = req.params.id;
-    let photos = req.body;
-    if(!id || !photos || !Array.isArray(photos)) res.status(400).json({ message: 'Photos must be in an array' });
-    let posted = await tripDB.insertPhotos(id, photos);
-    console.log(posted);
-    if(posted) res.status(201).json({ message: 'Photos posted to trip' });
-    else res.status(400).json({ message: 'Failed to post photos' });
-  }))
   .put(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
     let updates = req.body;
     if(!id || !updates) res.status(400).json({ message: 'No changes to make' });
     else {
-      let updated = await tripDB.update(id, updates);
-      if(updated) res.status(200).json({ message: 'Trip updated' });
-      else res.status(400).json({ message: 'Trip could not be updated' });
+      let [current] = await tripDB.findByID(id);
+      if(req.user_id !== current.user_id) res.status(400).json({ message: 'Permission denied' });
+      else {
+        let updated = await tripDB.update(id, updates);
+        if(updated) res.status(200).json({ message: 'Trip updated' });
+        else res.status(400).json({ message: 'Trip could not be updated' });
+      }
     }
   }))
   .delete(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
-    let deleted = await tripDB.remove(id);
-    if(deleted) res.status(200).json({ message: 'Trip deleted' });
-    else res.status(400).json({ message: 'Could not delete trip' });
+    let [current] = await tripDB.findByID(id);
+    if(req.user_id !== current.user_id) res.status(400).json({ message: 'Permission denied' });
+    else {
+      let deleted = await tripDB.remove(id);
+      if(deleted) res.status(200).json({ message: 'Trip deleted' });
+      else res.status(400).json({ message: 'Could not delete trip' });
+    }
   }));
 
 router.route('/photo/:id')
@@ -75,15 +73,24 @@ router.route('/photo/:id')
   .put(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
     let updates = req.body;
-    let updated = await tripDB.updatePhoto(id, updates);
-    if(updated) res.status(200).json({ message: 'Photo updated' });
-    else res.status(400).json({ message: 'Could not update photo' });
+    let [current] = await tripDB.getPhoto(id);
+    if(req.user_id !== current.user_id) res.status(400).json({ message: 'Permission denied' });
+    else {
+      if(updates.hasOwnProperty('user_id')) delete updates.user_id;
+      let updated = await tripDB.updatePhoto(id, updates);
+      if(updated) res.status(200).json({ message: 'Photo updated' });
+      else res.status(400).json({ message: 'Could not update photo' });
+    }
   }))
   .delete(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
-    let deleted = await tripDB.removePhoto(id);
-    if(deleted) res.status(200).json({ message: 'Deleted photo' });
-    else res.status(400).json({ message: 'Could not delete photo' });
+    let [current] = await tripDB.getPhoto(id);
+    if(req.user_id !== current.user_id) res.status(400).json({ message: 'Permission denied' });
+    else {
+      let deleted = await tripDB.removePhoto(id);
+      if(deleted) res.status(200).json({ message: 'Deleted photo' });
+      else res.status(400).json({ message: 'Could not delete photo' });
+    }
   }));
 
 router.route('/:id/photos')
@@ -93,11 +100,30 @@ router.route('/:id/photos')
     if(photos) res.status(200).json(photos);
     else res.status(404).json({ message: 'Could not retrieve photos' });
   }))
+  .post(authUser, errorWrapper(async (req, res) => {
+    // for posting photos to a trip
+    // photos are expected to be in an array
+    let id = req.params.id;
+    let photos = req.body;
+    if(!id || !photos || !Array.isArray(photos)) res.status(400).json({ message: 'Photos must be in an array' });
+    let [{user_id}] = await tripDB.findByID(id);
+    if(user_id && req.user_id === user_id) {
+      photos = photos.map(p => ({...p, user_id}));
+      let posted = await tripDB.insertPhotos(id, photos);
+      if(posted) res.status(201).json({ message: 'Photos posted to trip' });
+      else res.status(400).json({ message: 'Failed to post photos' });
+    }
+    else res.status(400).json({ message: 'Permission denied' });
+  }))
   .delete(authUser, errorWrapper(async (req, res) => {
     let id = req.params.id;
-    let deleted = await tripDB.removePhotos(id);
-    if(deleted) res.status(200).json({ message: 'Deleted photos', count: Array.isArray(deleted) ? deleted[0] : deleted });
-    else res.status(400).json({ message: 'Could not delete photos' });
+    let [current] = await tripDB.getPhotos(id);
+    if(req.user_id !== current.user_id) res.status(400).json({ message: 'Permission denied' });
+    else {
+      let deleted = await tripDB.removePhotos(id);
+      if(deleted) res.status(200).json({ message: 'Deleted photos', count: Array.isArray(deleted) ? deleted[0] : deleted });
+      else res.status(400).json({ message: 'Could not delete photos' });
+    }
   }));
 
 
