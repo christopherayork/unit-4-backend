@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "updatedocs": "apidoc -i ./ -o apidoc/ -e node_modules/"
   },
   "repository": {
     "type": "git",
@@ -32,5 +33,12 @@
   },
   "devDependencies": {
     "nodemon": "^1.19.2"
+  },
+  "api_doc": {
+    "title": "Expat Journal Backend Documentation",
+    "url": "https://expat-journal-api.herokuapp.com",
+    "sampleUrl": "https://expat-journal-api.herokuapp.com/trips",
+    "name": "Expat Journal Backend",
+    "version": "1.0.0"
   }
 }

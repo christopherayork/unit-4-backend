@@ -14,6 +14,10 @@ server.use(cors(corsConfig));
 server.use('/users', usersRouter);
 server.use('/trips', tripsRouter);
 
+server.get('/docs', (req, res) => {
+  res.sendFile('./apidoc/index.html');
+});
+
 
 
 module.exports = server;

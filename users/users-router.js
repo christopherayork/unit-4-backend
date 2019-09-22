@@ -9,6 +9,7 @@ const authUser = require('../auth/authUser');
 router.route('/')
   .get(errorWrapper(async (req, res) => {
     let users = await userDB.find();
+    users.forEach(u => delete u.password);
     if(users) res.status(200).json(users);
     else res.status(404).json({ message: 'Could not retrieve users' });
   }));
@@ -45,7 +46,7 @@ router.route('/login')
       if(storedUser && await bcrypt.compare(credentials.password, storedUser.password)) {
         let token = generateToken(storedUser);
         await userDB.assignToken(storedUser.id, token);
-        res.status(200).json({ token });
+        res.status(200).json({ token, user_id: storedUser.id });
       } else {
         res.status(400).json({ message: 'Invalid credentials' });
       }
@@ -59,6 +60,7 @@ router.route('/:id')
     let id = req.params.id;
     let [user] = await userDB.findByID(id);
     user.trips = await userDB.findTripsById(id);
+    delete user.password;
     if(user) res.status(200).json(user);
     else res.status(404).json({ message: 'Could not find user' });
   }))
