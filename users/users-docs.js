@@ -46,6 +46,15 @@
  * @apiSuccess {String} token Token to authenticate the user with
  * @apiSuccess {Number} id ID of the new user.
  *
+ * @apiExample {js} Example request.body:
+ *    {
+  *      "email": "johndoe@gmail.com",
+  *      "password": "blahblah",
+  *      "first_name": "John",
+  *      "last_name": "Doe",
+  *      "profileType": "public" // private is the alternative
+  *    }
+ *
  * @apiSuccessExample Success-Response:
   *    201 Created
  *     {

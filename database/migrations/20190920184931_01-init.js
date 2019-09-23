@@ -7,6 +7,7 @@ exports.up = function(knex) {
       tbl.string('password').notNullable();
       tbl.string('first_name').notNullable();
       tbl.string('last_name');
+      tbl.string('profileType');
     })
     .createTable('trips', tbl => {
       tbl.increments();
