@@ -29,7 +29,7 @@ router.route('/register')
         if(!storedUser) res.status(400).json({ message: 'User was not saved properly' });
         else {
           let token = generateToken(storedUser);
-          await userDB.assignToken(success, token);
+          //await userDB.assignToken(success, token);
           res.status(201).json({ user_id: success, token, message: 'User saved, token is used to authenticate' });
         }
       }
@@ -45,7 +45,6 @@ router.route('/login')
       let [storedUser] = await userDB.findByEmail(credentials.email);
       if(storedUser && await bcrypt.compare(credentials.password, storedUser.password)) {
         let token = generateToken(storedUser);
-        await userDB.assignToken(storedUser.id, token);
         res.status(200).json({ token, user_id: storedUser.id });
       } else {
         res.status(400).json({ message: 'Invalid credentials' });

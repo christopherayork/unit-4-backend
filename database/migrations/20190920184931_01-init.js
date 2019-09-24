@@ -21,16 +21,12 @@ exports.up = function(knex) {
       tbl.integer('trip_id').notNullable().references('id').inTable('trips');
       tbl.integer('user_id').notNullable().references('id').inTable('users');
       tbl.string('url').notNullable();
+      tbl.boolean('default').defaultTo(false);
     })
-    .createTable('tokens', tbl => {
-      tbl.integer('user_id').unique().notNullable().references('id').inTable('users');
-      tbl.string('token').notNullable().unique();
-    });
 };
 
 exports.down = function(knex) {
   return knex.schema
-    .dropTableIfExists('tokens')
     .dropTableIfExists('photos')
     .dropTableIfExists('trips')
     .dropTableIfExists('users');

@@ -1,7 +1,19 @@
 const db = require('../database/dbConfig');
 
 function find() {
-  return db('trips');
+  //return db('trips');
+  return db.select([
+    'trips.id as trip_id',
+    'trips.user_id',
+    'trips.location',
+    'trips.description',
+    'trips.short_desc',
+    'photos.id as photo_id',
+    'photos.url',
+  ])
+    .from('trips')
+    .join('photos', 'photos.trip_id', 'trips.id')
+    .where('photos.default', true);
 }
 
 function findByID(id) {
@@ -41,7 +53,7 @@ function insertPhotos(trip_id, photos) {
 }
 
 function updatePhoto(id, photo) {
-  if(!photo || !photo.url) return false;
+  if(!photo) return false;
   else return db('photos').where({ id }).update({ id, ...photo });
 }
 

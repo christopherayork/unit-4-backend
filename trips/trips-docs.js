@@ -16,18 +16,22 @@
  *      200 OK
  *      [
  *        {
- *          "id": 1,
+ *          "trip_id": 1,
  *          "user_id": 1,
  *          "location": "Somewhere",
  *          "description": "Text",
- *          "short_desc": "Short text"
+ *          "short_desc": "Short text",
+ *          "photo_id": 1,
+ *          "url": "Some URL" // just matches the default photo
  *        },
  *        {
  *          "id": 2,
  *          "user_id": 4,
  *          "location": "Somewhere else",
  *          "description": "Text",
- *          "short_desc": "Short text"
+ *          "short_desc": "Short text",
+ *          "photo_id": 3,
+ *          "url": "Some other URL"
  *        }
  *        // and so on
  *      ]

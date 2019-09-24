@@ -77,7 +77,17 @@ router.route('/photo/:id')
     if(req.user_id !== current.user_id) res.status(400).json({ message: 'Permission denied' });
     else {
       if(updates.hasOwnProperty('user_id')) delete updates.user_id;
+      if(updates.default) {
+        let currentPhotos = await tripDB.getPhotos(current.trip_id);
+        currentPhotos.forEach(p => {
+          const forceSingleDefault = async () => {
+            if(p.default) await tripDB.updatePhoto(p.id, { ...p, default: 0 });
+          };
+          forceSingleDefault();
+        });
+      }
       let updated = await tripDB.updatePhoto(id, updates);
+      console.log(updated);
       if(updated) res.status(200).json({ message: 'Photo updated' });
       else res.status(400).json({ message: 'Could not update photo' });
     }
@@ -109,6 +119,9 @@ router.route('/:id/photos')
     let [{user_id}] = await tripDB.findByID(id);
     if(user_id && req.user_id === user_id) {
       photos = photos.map(p => ({...p, user_id}));
+      let currentPhotos = await tripDB.getPhotos(id);
+      let foundDefault = currentPhotos.filter(p => p.default);
+      if(!foundDefault || !foundDefault.length) photos[0].default = true;
       let posted = await tripDB.insertPhotos(id, photos);
       if(posted) res.status(201).json({ message: 'Photos posted to trip' });
       else res.status(400).json({ message: 'Failed to post photos' });
