@@ -21,7 +21,7 @@ router.route('/')
       let [posted] = await tripDB.insert(trip);
       console.log(posted);
       if(posted && Array.isArray(photos)) {
-        photos = photos.map(p => ({...p, user_id: req.user_id, trip_id: posted}));
+        photos = photos.map(p => ({...p, user_id: req.user_id}));
         console.log(photos);
         let photoPosted = await tripDB.insertPhotos(posted, photos);
         res.status(201).json({ message: 'Trip created', trip_id: posted, photos: photoPosted ? 'Photos posted' : 'Photos weren\'t posted' });
