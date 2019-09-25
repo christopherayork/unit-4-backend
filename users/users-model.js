@@ -9,7 +9,7 @@ function findByID(id) {
 }
 
 function findByEmail(email) {
-  return db('users').where({ email });
+  return db('users').where({ email }).first();
 }
 
 function findTripsById(user_id) {
