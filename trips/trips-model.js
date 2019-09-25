@@ -49,7 +49,9 @@ function getPhotos(trip_id) {
 function insertPhotos(trip_id, photos) {
   if(!Array.isArray(photos) || !trip_id) return false;
   let updatedPhotos = photos.map(photo => ({...photo, trip_id: +trip_id}));
-  return db('photos').insert(updatedPhotos).returning('id');
+  return Promise.all(updatedPhotos.map(p => {
+    return db('photos').insert(p).returning('id');
+  }));
 }
 
 function updatePhoto(id, photo) {
