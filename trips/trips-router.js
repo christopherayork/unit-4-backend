@@ -13,6 +13,7 @@ router.route('/')
   .post(authUser, errorWrapper(async (req, res) => {
     let trip = req.body;
     let photos = trip.photos ? [...trip.photos] : null;
+    console.log(req.user_id);
     trip = { user_id: req.user_id, location: trip.location, description: trip.description, short_desc: trip.short_desc };
     console.log(trip);
     if(!trip || !trip.location || !trip.description || !trip.user_id) res.status(400).json({ message: 'Could not post trip to that user' });
