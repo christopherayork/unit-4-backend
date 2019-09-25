@@ -42,7 +42,7 @@ router.route('/login')
   .post(errorWrapper(async (req, res) => {
     let credentials = req.body;
     if(credentials && credentials.email && credentials.password) {
-      let [storedUser] = await userDB.findByEmail(credentials.email);
+      let storedUser = await userDB.findByEmail(credentials.email);
       if(storedUser && await bcrypt.compare(credentials.password, storedUser.password)) {
         let token = generateToken(storedUser);
         res.status(200).json({ token, user_id: storedUser.id });
