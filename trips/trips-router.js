@@ -19,7 +19,7 @@ router.route('/')
     if(!trip || !trip.location || !trip.description || !trip.user_id) res.status(400).json({ message: 'Could not post trip to that user' });
     else {
       let [posted] = await tripDB.insert(trip);
-      console.log('test');
+      console.log(posted);
       if(posted && Array.isArray(photos)) {
         photos = photos.map(p => ({...p, user_id: req.user_id}));
         console.log(photos);
