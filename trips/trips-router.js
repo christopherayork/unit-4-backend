@@ -21,12 +21,12 @@ router.route('/')
       let [posted] = await tripDB.insert(trip);
       console.log(posted);
       if(posted && Array.isArray(photos)) {
-        photos = photos.map(p => ({...p, user_id: req.user_id}));
+        photos = photos.map(p => ({...p, user_id: req.user_id, trip_id: posted}));
         console.log(photos);
         let photoPosted = await tripDB.insertPhotos(posted, photos);
         res.status(201).json({ message: 'Trip created', trip_id: posted, photos: photoPosted ? 'Photos posted' : 'Photos weren\'t posted' });
       }
-      else if(posted) res.status(201).json({ message: 'Trip created', trip_id: posted[0] });
+      else if(posted) res.status(201).json({ message: 'Trip created', trip_id: posted });
       else res.status(400).json({ message: 'Could not post trip' });
     }
   }));
