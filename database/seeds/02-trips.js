@@ -3,8 +3,7 @@ exports.seed = function(knex) {
   // Deletes ALL existing entries
   return knex('trips').del()
     .then(function () {
-      // Inserts seed entries
-      return knex('trips').insert([
+      let trips = [
         {id: 1, user_id: 1, location: 'Dublin, Ireland',
           description: 'I went to Ireland to have some beer, it was super fun!',
           short_desc: 'Beer in Ireland'
@@ -25,6 +24,8 @@ exports.seed = function(knex) {
           description: 'Beautiful city, lots to do. Don\'t dine in if you\re on a budget.',
           short_desc: 'Get the chocolate.'
         }
-      ]);
+      ];
+      // Inserts seed entries
+      return Promise.all(trips.map(t => knex('trips').insert(t).returning('id')));
     });
 };
