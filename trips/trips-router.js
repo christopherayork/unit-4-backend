@@ -13,7 +13,7 @@ router.route('/')
   .post(authUser, errorWrapper(async (req, res) => {
     let trip = req.body;
     let photos = trip.photos ? [...trip.photos] : null;
-    trip = { user_id: trip.user_id, location: trip.location, description: trip.description, short_desc: trip.short_desc };
+    trip = { user_id: req.user_id, location: trip.location, description: trip.description, short_desc: trip.short_desc };
     if(!trip || !trip.location || !trip.description || !trip.user_id) res.status(400).json({ message: 'Could not post trip to that user' });
     else {
       let [posted] = await tripDB.insert(trip);
