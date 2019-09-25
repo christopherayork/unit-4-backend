@@ -29,7 +29,6 @@ router.route('/register')
         if(!storedUser) res.status(400).json({ message: 'User was not saved properly' });
         else {
           let token = generateToken(storedUser);
-          //await userDB.assignToken(success, token);
           res.status(201).json({ user_id: success, token, message: 'User saved, token is used to authenticate' });
         }
       }

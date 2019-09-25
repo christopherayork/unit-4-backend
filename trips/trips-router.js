@@ -13,16 +13,13 @@ router.route('/')
   .post(authUser, errorWrapper(async (req, res) => {
     let trip = req.body;
     let photos = trip.photos ? [...trip.photos] : null;
-    console.log(req.user_id);
     trip = { user_id: req.user_id, location: trip.location, description: trip.description, short_desc: trip.short_desc };
-    console.log(trip);
     if(!trip || !trip.location || !trip.description || !trip.user_id) res.status(400).json({ message: 'Could not post trip to that user' });
     else {
       let [posted] = await tripDB.insert(trip);
-      console.log(posted);
       if(posted && Array.isArray(photos)) {
         photos = photos.map(p => ({...p, user_id: req.user_id}));
-        console.log(photos);
+        photos[0].default = true;
         let photoPosted = await tripDB.insertPhotos(posted, photos);
         res.status(201).json({ message: 'Trip created', trip_id: posted, photos: photoPosted ? 'Photos posted' : 'Photos weren\'t posted' });
       }
@@ -91,7 +88,6 @@ router.route('/photo/:id')
         });
       }
       let updated = await tripDB.updatePhoto(id, updates);
-      console.log(updated);
       if(updated) res.status(200).json({ message: 'Photo updated' });
       else res.status(400).json({ message: 'Could not update photo' });
     }
