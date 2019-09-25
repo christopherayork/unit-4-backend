@@ -22,7 +22,7 @@ function findByID(id) {
 
 function insert(trip) {
   if(!trip || !trip.user_id || !trip.location || !trip.description) return false;
-  else return db('trips').insert(trip);
+  else return db('trips').insert(trip).returning('id');
 }
 
 function update(id, updates) {
@@ -49,7 +49,7 @@ function getPhotos(trip_id) {
 function insertPhotos(trip_id, photos) {
   if(!Array.isArray(photos) || !trip_id) return false;
   let updatedPhotos = photos.map(photo => ({...photo, trip_id: +trip_id}));
-  return db('photos').insert(updatedPhotos);
+  return db('photos').insert(updatedPhotos).returning('id');
 }
 
 function updatePhoto(id, photo) {

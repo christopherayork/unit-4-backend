@@ -20,7 +20,7 @@ async function insert(user) {
   if(!user || !user.email || !user.password || !user.first_name) return false;
   let [exists] = await findByEmail(user.email);
   if(exists) return [-1];
-  else return db('users').insert(user);
+  else return db('users').insert(user).returning('id');
 }
 
 function update(id, updates) {
