@@ -13,7 +13,7 @@ exports.up = function(knex) {
       tbl.increments();
       tbl.integer('user_id').notNullable().references('id').inTable('users');
       tbl.string('location').notNullable();
-      tbl.string('description').notNullable();
+      tbl.string('description', 10200).notNullable();
       tbl.string('short_desc');
     })
     .createTable('photos', tbl => {
