@@ -29,7 +29,6 @@ function update(id, updates) {
 }
 
 async function remove(id) {
-  await db('tokens').where({ user_id: id }).del();
   return db('users').where({ id }).del();
 }
 
