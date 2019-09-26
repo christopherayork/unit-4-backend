@@ -55,6 +55,7 @@
  *        // photos are optional
  *        "photos": [
  *          {
+ *            "default": true,
  *            "url": "Some Url"
  *          },
  *          {
@@ -251,6 +252,7 @@
  * @apiExample {js} Example request.body:
  *      [
  *        {
+ *          "default": true,
  *          "url": "New photo URL"
  *        },
  *        {
