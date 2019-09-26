@@ -15,7 +15,7 @@ exports.seed = function(knex) {
   // Deletes ALL existing entries
   return knex('photos').del()
     .then(function () {
-      let photos = [
+      return knex('photos').insert([
         {trip_id: 1, user_id: 1, url: 'https://i.imgur.com/vlN7peS.jpg', default: true},
         {trip_id: 1, user_id: 1, url: 'https://i.imgur.com/HFWG6h0.jpg'},
         {trip_id: 2, user_id: 1, url: 'https://i.imgur.com/dn5ag9A.jpg', default: true},
@@ -26,8 +26,6 @@ exports.seed = function(knex) {
         {trip_id: 4, user_id: 3, url: 'https://i.imgur.com/GHEAOmQ.jpg'},
         {trip_id: 5, user_id: 3, url: 'https://i.imgur.com/L4T83y3.jpg', default: true},
         {trip_id: 5, user_id: 3, url: 'https://i.imgur.com/0AAs6Sj.jpg'}
-      ];
-      // Inserts seed entries
-      return Promise.all(photos.map(p => knex('photos').insert(p).returning('id')));
+      ]);
     });
 };
